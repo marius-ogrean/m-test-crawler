@@ -1,0 +1,1 @@
+storm.ps1 jar target/stormcrawler-1.0-SNAPSHOT.jar org.apache.storm.flux.Flux --remote crawler.flux

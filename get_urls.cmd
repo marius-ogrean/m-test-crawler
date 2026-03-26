@@ -1,0 +1,1 @@
+java -cp target/stormcrawler-1.0-SNAPSHOT.jar crawlercommons.urlfrontier.client.Client GetURLs
