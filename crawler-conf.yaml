@@ -77,7 +77,7 @@ config:
   # Set -1 to disable the limit.
   http.content.limit: 65536
 
-  urlfrontier.host: "localhost"
+  urlfrontier.host: "urlfrontier"
   urlfrontier.port: 7071
 
   urlfrontier.max.buckets: 50
