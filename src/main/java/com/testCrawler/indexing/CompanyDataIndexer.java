@@ -185,6 +185,11 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
             solrClient.add(solrCollection, document, 100);
         } catch (Exception ex) {
             LOG.error("Error updating doc", ex);
+            try {
+                solrClient.add(solrCollection, document, 100);
+            } catch (Exception ex1) {
+                LOG.error("Error updating doc retry", ex1);
+            }
         }
     }
 
