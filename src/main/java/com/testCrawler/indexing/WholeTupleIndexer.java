@@ -10,5 +10,6 @@ public class WholeTupleIndexer  extends AbstractIndexerBolt {
         for (var field : tuple.getFields()) {
             System.out.println(field + " - " + tuple.getValueByField(field).toString());
         }
+        System.out.println("tuple ended:");
     }
 }
