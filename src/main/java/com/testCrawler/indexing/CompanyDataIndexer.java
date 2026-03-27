@@ -31,14 +31,12 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
 
     private int maxLengthCharsetDetection = -1;
     private boolean fastCharsetDetection;
-    private CompanyDataFilter companyDataFilter;
     private SolrClient solrClient;
 
     @Override
     public void prepare(Map<String, Object> conf, TopologyContext context, OutputCollector collector) {
         this.maxLengthCharsetDetection = ConfUtils.getInt(conf, "detect.charset.maxlength", -1);
         this.fastCharsetDetection = ConfUtils.getBoolean(conf, "detect.charset.fast", false);
-        companyDataFilter = new CompanyDataFilter();
 
         var solrUrl = ConfUtils.getString(conf, "solr.url", "");
 
@@ -72,9 +70,9 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
 
         var body = jsoupDoc.body();
 
+        var companyDataFilter = new CompanyDataFilter();
+
         body.filter(companyDataFilter);
-
-
 
         companyDataFilter.getPhoneData().forEach(phone -> {
             System.out.println("Phone: " + phone);
