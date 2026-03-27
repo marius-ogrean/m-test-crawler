@@ -70,7 +70,7 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
         });
 
         companyDataFilter.getAddressData().forEach(address -> {
-            System.out.println("Social: " + address);
+            System.out.println("Address: " + address);
         });
 
         LOG.info("Finished indexing " + url);
