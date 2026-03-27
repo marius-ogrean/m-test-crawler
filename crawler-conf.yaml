@@ -164,3 +164,4 @@ config:
      - class: "org.apache.storm.metric.LoggingMetricsConsumer"
        parallelism.hint: 1
 
+  solr.url: "http://solr:8983/solr"

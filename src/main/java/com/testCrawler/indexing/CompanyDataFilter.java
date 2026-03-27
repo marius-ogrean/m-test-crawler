@@ -1,5 +1,6 @@
 package com.testCrawler.indexing;
 
+import lombok.Getter;
 import org.jsoup.internal.StringUtil;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
@@ -12,24 +13,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+@Getter
 public class CompanyDataFilter implements NodeFilter {
     private static final Logger LOG = LoggerFactory.getLogger(CompanyDataFilter.class);
 
     private final List<String> phoneData = new ArrayList<>();
     private final List<String> socialsData = new ArrayList<>();
     private final List<String> addressData = new ArrayList<>();
-
-    public List<String> getPhoneData() {
-        return phoneData;
-    }
-
-    public List<String> getSocialsData() {
-        return socialsData;
-    }
-
-    public List<String> getAddressData() {
-        return addressData;
-    }
 
     @Override
     public FilterResult head(Node node, int depth) {

@@ -1,5 +1,13 @@
 package com.testCrawler.indexing;
 
+import com.testCrawler.models.CompanyDocument;
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.impl.HttpJdkSolrClient;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.MapSolrParams;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.tuple.Tuple;
@@ -14,20 +22,27 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.Map;
 
 public class CompanyDataIndexer extends AbstractIndexerBolt {
     private static final Logger LOG = LoggerFactory.getLogger(CompanyDataIndexer.class);
+    private final String solrCollection = "companies";
 
     private int maxLengthCharsetDetection = -1;
     private boolean fastCharsetDetection;
+    private CompanyDataFilter companyDataFilter;
+    private SolrClient solrClient;
 
     @Override
     public void prepare(Map<String, Object> conf, TopologyContext context, OutputCollector collector) {
-        super.prepare(conf, context, collector);
-
         this.maxLengthCharsetDetection = ConfUtils.getInt(conf, "detect.charset.maxlength", -1);
         this.fastCharsetDetection = ConfUtils.getBoolean(conf, "detect.charset.fast", false);
+        companyDataFilter = new CompanyDataFilter();
+
+        var solrUrl = ConfUtils.getString(conf, "solr.url", "");
+
+        solrClient = new HttpJdkSolrClient.Builder(solrUrl).build();
     }
 
     @Override
@@ -53,13 +68,13 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
             return;
         }
 
-        LOG.info("Indexing " + url);
+        LOG.info("Indexing {}", url);
 
         var body = jsoupDoc.body();
 
-        var companyDataFilter = new CompanyDataFilter();
-
         body.filter(companyDataFilter);
+
+
 
         companyDataFilter.getPhoneData().forEach(phone -> {
             System.out.println("Phone: " + phone);
@@ -73,6 +88,44 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
             System.out.println("Address: " + address);
         });
 
-        LOG.info("Finished indexing " + url);
+        LOG.info("Finished indexing {}", url);
+    }
+
+    SolrDocument getCompanyDocument(String domain) {
+        final Map<String, String> queryParamMap = new HashMap<>();
+        var query = String.format("id:\"%s\"", domain);
+        queryParamMap.put("q", query);
+        var queryParams = new MapSolrParams(queryParamMap);
+
+        try {
+            final QueryResponse response = solrClient.query(solrCollection, queryParams);
+            final SolrDocumentList documents = response.getResults();
+
+            if (documents.isEmpty()) {
+                return null;
+            }
+
+            var solrDocument = documents.get(0);
+            return solrDocument;
+        } catch (Exception ex) {
+            LOG.error("Error retrieving document", ex);
+            return null;
+        }
+    }
+
+    void updateDoc() {
+        var document = new SolrInputDocument();
+        document.addField("id","mmm");
+
+        Map<String,Object> fieldModifier = new HashMap<>(1);
+        fieldModifier.put("add","Cyberpunk");
+
+        document.addField("phoneData", fieldModifier);
+
+        try {
+            solrClient.add(document);
+        } catch (Exception ex) {
+            LOG.error("Error updating doc", ex);
+        }
     }
 }
