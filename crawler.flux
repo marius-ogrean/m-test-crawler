@@ -32,7 +32,10 @@ bolts:
     parallelism: 1
   - id: "shunt"
     className: "org.apache.stormcrawler.tika.RedirectionBolt"
-    parallelism: 1 
+    parallelism: 1
+  - id: "wholeTuple"
+    className: "com.testCrawler.indexing.WholeTupleIndexer"
+    parallelism: 1
   - id: "tika"
     className: "org.apache.stormcrawler.tika.ParserBolt"
     parallelism: 1
@@ -87,9 +90,14 @@ streams:
       type: LOCAL_OR_SHUFFLE
 
   - from: "shunt"
-    to: "index"
+    to: "wholeTuple"
     grouping:
       type: LOCAL_OR_SHUFFLE
+
+  - from: "wholeTuple"
+      to: "index"
+      grouping:
+        type: LOCAL_OR_SHUFFLE
 
   - from: "fetcher"
     to: "status"
