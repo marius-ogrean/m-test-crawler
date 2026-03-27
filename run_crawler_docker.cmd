@@ -6,4 +6,4 @@ docker run --network m-test-crawler_default -it ^
 -v "D:\\Development\\m-test-crawler\\crawler.flux:/apache-storm/crawler.flux" ^
 -v "D:\\Development\\m-test-crawler\\target\\stormcrawler-1.0-SNAPSHOT.jar:/apache-storm/stormcrawler-1.0-SNAPSHOT.jar" ^
 storm:latest ^
-storm jar /apache-storm/stormcrawler-1.0-SNAPSHOT.jar org.apache.storm.flux.Flux --remote crawler.flux
+storm jar stormcrawler-1.0-SNAPSHOT.jar org.apache.storm.flux.Flux --remote crawler.flux
