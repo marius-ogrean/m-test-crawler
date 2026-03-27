@@ -38,3 +38,12 @@ services:
     restart: always
     ports:
       - "127.0.0.1:7071:7071"
+
+  solr:
+    image: solr:latest
+    restart: always
+    ports:
+      - "8983:8983"
+    command:
+      - solr-precreate
+      - companies
