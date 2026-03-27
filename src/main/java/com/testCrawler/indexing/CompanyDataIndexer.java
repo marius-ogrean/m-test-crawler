@@ -88,7 +88,7 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
         if (companyDocument == null) {
             createDocument(companyDataFilter, domain);
         } else {
-            updateDocument(companyDataFilter, domain);
+            updateDocument(companyDataFilter, domain, companyDocument);
         }
 
         LOG.info("Finished indexing {}", url);
@@ -135,35 +135,58 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
         }
     }
 
-    void updateDocument(CompanyDataFilter companyDataFilter, String domain) {
+    void updateDocument(CompanyDataFilter companyDataFilter, String domain, CompanyDocument existingDocument) {
         var document = new SolrInputDocument();
         document.addField("id",domain);
 
+        boolean shouldUpdate = false;
+
+        LOG.info("Updating current document: " + existingDocument.toString());
+
         if (!companyDataFilter.getPhoneData().isEmpty()) {
             var fieldModifier = new HashMap<String, Object>();
-            fieldModifier.put("add", companyDataFilter.getPhoneData());
+            if (existingDocument.getPhoneData() == null) {
+                fieldModifier.put("set", companyDataFilter.getPhoneData());
+            } else {
+                fieldModifier.put("add", companyDataFilter.getPhoneData());
+            }
 
             document.addField("phoneData", fieldModifier);
+            shouldUpdate = true;
         }
 
         if (!companyDataFilter.getSocialsData().isEmpty()) {
             var fieldModifier = new HashMap<String, Object>();
-            fieldModifier.put("add", companyDataFilter.getSocialsData());
+            if (existingDocument.getSocialsData() == null) {
+                fieldModifier.put("set", companyDataFilter.getSocialsData());
+            } else {
+                fieldModifier.put("add", companyDataFilter.getSocialsData());
+            }
 
             document.addField("socialsData", fieldModifier);
+            shouldUpdate = true;
         }
 
         if (!companyDataFilter.getAddressData().isEmpty()) {
             var fieldModifier = new HashMap<String, Object>();
-            fieldModifier.put("add", companyDataFilter.getAddressData());
+            if (existingDocument.getAddressData() == null) {
+                fieldModifier.put("set", companyDataFilter.getAddressData());
+            } else {
+                fieldModifier.put("add", companyDataFilter.getAddressData());
+            }
 
             document.addField("addressData", fieldModifier);
+            shouldUpdate = true;
+        }
+
+        if (!shouldUpdate) {
+            return;
         }
 
         try {
-            var client = new HttpJdkSolrClient.Builder(solrUrl + "/" + solrCollection).build();
+            var client = new HttpJdkSolrClient.Builder(solrUrl).build();
             client.add(document);
-            client.commit(solrCollection);
+            client.commit();
             client.close();
         } catch (Exception ex) {
             LOG.error("Error updating doc", ex);
