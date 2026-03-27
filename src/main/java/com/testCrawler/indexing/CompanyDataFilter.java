@@ -3,12 +3,16 @@ package com.testCrawler.indexing;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.NodeFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class CompanyDataFilter implements NodeFilter {
+    private static final Logger LOG = LoggerFactory.getLogger(CompanyDataFilter.class);
+
     private final List<String> phoneData = new ArrayList<>();
     private final List<String> socialsData = new ArrayList<>();
     private final List<String> addressData = new ArrayList<>();
@@ -46,7 +50,7 @@ public class CompanyDataFilter implements NodeFilter {
                 addressData.add(ownText);
             }
         } catch (Exception ex) {
-
+            LOG.error("Filter error: ", ex);
         }
 
         return FilterResult.CONTINUE;
