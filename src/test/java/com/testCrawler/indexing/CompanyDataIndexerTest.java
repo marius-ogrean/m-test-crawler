@@ -1,5 +1,6 @@
 package com.testCrawler.indexing;
 
+import com.testCrawler.models.CompanyDocument;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -15,9 +16,9 @@ public class CompanyDataIndexerTest {
 
         companyDataIndexer.prepare(conf, null, null);
 
-        //var result = companyDataIndexer.getCompanyDocument("url");
+        var result = companyDataIndexer.getCompanyDocument("bostonzen.org");
 
-        var companyDataFilter = new CompanyDataFilter();
+       /*var companyDataFilter = new CompanyDataFilter();
         companyDataFilter.getPhoneData().addAll(Arrays.asList("phone1", "phone2"));
         companyDataFilter.getSocialsData().addAll(Arrays.asList("social1", "social2"));
         companyDataFilter.getAddressData().addAll(Arrays.asList("address1", "address2"));
@@ -29,6 +30,6 @@ public class CompanyDataIndexerTest {
         companyDataFilterForUpdate.getSocialsData().addAll(Arrays.asList("social3"));
         companyDataFilterForUpdate.getAddressData().addAll(Arrays.asList("address3"));
 
-        companyDataIndexer.updateDocument(companyDataFilterForUpdate, "test.org");
+        companyDataIndexer.updateDocument(companyDataFilterForUpdate, "test.org", CompanyDocument.builder().build());*/
     }
 }
