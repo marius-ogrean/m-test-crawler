@@ -4,8 +4,6 @@ import com.testCrawler.models.CompanyDocument;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.HttpJdkSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.MapSolrParams;
 import org.apache.storm.task.OutputCollector;
@@ -23,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CompanyDataIndexer extends AbstractIndexerBolt {
@@ -78,7 +77,7 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
 
         logCompanyDataFilter(companyDataFilter);
 
-        var domain = tuple.getStringByField("domain");
+        var domain = metadata.getFirstValue("domain");
 
         var companyDocument = getCompanyDocument(domain);
 
@@ -124,7 +123,7 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
                 .phoneData(companyDataFilter.getPhoneData())
                 .socialsData(companyDataFilter.getSocialsData())
                 .addressData(companyDataFilter.getAddressData())
-                .fromCrawl(true)
+                .fromCrawl(List.of(true))
                 .build();
 
         try {

@@ -26,5 +26,5 @@ public class CompanyDocument {
     private List<String> addressData;
 
     @Field
-    private boolean fromCrawl;
+    private List<Boolean> fromCrawl;
 }
