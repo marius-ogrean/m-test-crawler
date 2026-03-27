@@ -163,6 +163,7 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
         try {
             var client = new HttpJdkSolrClient.Builder(solrUrl + "/" + solrCollection).build();
             client.add(document);
+            client.commit(solrCollection);
             client.close();
         } catch (Exception ex) {
             LOG.error("Error updating doc", ex);
