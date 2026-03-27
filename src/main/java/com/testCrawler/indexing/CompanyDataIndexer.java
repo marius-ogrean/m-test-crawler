@@ -28,17 +28,19 @@ import java.util.Map;
 public class CompanyDataIndexer extends AbstractIndexerBolt {
     private static final Logger LOG = LoggerFactory.getLogger(CompanyDataIndexer.class);
     private final String solrCollection = "companies";
+    private final String errorString = "error";
 
     private int maxLengthCharsetDetection = -1;
     private boolean fastCharsetDetection;
     private SolrClient solrClient;
+    private String solrUrl;
 
     @Override
     public void prepare(Map<String, Object> conf, TopologyContext context, OutputCollector collector) {
         this.maxLengthCharsetDetection = ConfUtils.getInt(conf, "detect.charset.maxlength", -1);
         this.fastCharsetDetection = ConfUtils.getBoolean(conf, "detect.charset.fast", false);
 
-        var solrUrl = ConfUtils.getString(conf, "solr.url", "");
+        solrUrl = ConfUtils.getString(conf, "solr.url", "");
 
         solrClient = new HttpJdkSolrClient.Builder(solrUrl).build();
     }
@@ -74,17 +76,21 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
 
         body.filter(companyDataFilter);
 
-        companyDataFilter.getPhoneData().forEach(phone -> {
-            System.out.println("Phone: " + phone);
-        });
+        logCompanyDataFilter(companyDataFilter);
 
-        companyDataFilter.getSocialsData().forEach(social -> {
-            System.out.println("Social: " + social);
-        });
+        var domain = tuple.getStringByField("domain");
 
-        companyDataFilter.getAddressData().forEach(address -> {
-            System.out.println("Address: " + address);
-        });
+        var companyDocument = getCompanyDocument(domain);
+
+        if (companyDocument != null && companyDocument.getId().equals(errorString)) {
+            return;
+        }
+
+        if (companyDocument == null) {
+            createDocument(companyDataFilter, domain);
+        } else {
+            updateDocument(companyDataFilter, domain);
+        }
 
         LOG.info("Finished indexing {}", url);
     }
@@ -107,23 +113,74 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
             return document;
         } catch (Exception ex) {
             LOG.error("Error retrieving document", ex);
-            return null;
+            var errorDocument = CompanyDocument.builder().id(errorString).build();
+            return errorDocument;
         }
     }
 
-    void updateDoc() {
-        var document = new SolrInputDocument();
-        document.addField("id","mmm");
-
-        Map<String,Object> fieldModifier = new HashMap<>(1);
-        fieldModifier.put("add","Cyberpunk");
-
-        document.addField("phoneData", fieldModifier);
+    void createDocument(CompanyDataFilter companyDataFilter, String domain) {
+        var companyDocument = CompanyDocument.builder()
+                .id(domain)
+                .phoneData(companyDataFilter.getPhoneData())
+                .socialsData(companyDataFilter.getSocialsData())
+                .addressData(companyDataFilter.getAddressData())
+                .fromCrawl(true)
+                .build();
 
         try {
-            solrClient.add(document);
+            var response = solrClient.addBean(solrCollection, companyDocument);
+
+            solrClient.commit(solrCollection);
+        } catch (Exception ex) {
+            LOG.error("Error creating document", ex);
+        }
+    }
+
+    void updateDocument(CompanyDataFilter companyDataFilter, String domain) {
+        var document = new SolrInputDocument();
+        document.addField("id",domain);
+
+        if (!companyDataFilter.getPhoneData().isEmpty()) {
+            var fieldModifier = new HashMap<String, Object>();
+            fieldModifier.put("add", companyDataFilter.getPhoneData());
+
+            document.addField("phoneData", fieldModifier);
+        }
+
+        if (!companyDataFilter.getSocialsData().isEmpty()) {
+            var fieldModifier = new HashMap<String, Object>();
+            fieldModifier.put("add", companyDataFilter.getSocialsData());
+
+            document.addField("socialsData", fieldModifier);
+        }
+
+        if (!companyDataFilter.getAddressData().isEmpty()) {
+            var fieldModifier = new HashMap<String, Object>();
+            fieldModifier.put("add", companyDataFilter.getAddressData());
+
+            document.addField("addressData", fieldModifier);
+        }
+
+        try {
+            var client = new HttpJdkSolrClient.Builder(solrUrl + "/" + solrCollection).build();
+            client.add(document);
+            client.close();
         } catch (Exception ex) {
             LOG.error("Error updating doc", ex);
         }
+    }
+
+    private void logCompanyDataFilter(CompanyDataFilter companyDataFilter) {
+        companyDataFilter.getPhoneData().forEach(phone -> {
+            System.out.println("Phone: " + phone);
+        });
+
+        companyDataFilter.getSocialsData().forEach(social -> {
+            System.out.println("Social: " + social);
+        });
+
+        companyDataFilter.getAddressData().forEach(address -> {
+            System.out.println("Address: " + address);
+        });
     }
 }
