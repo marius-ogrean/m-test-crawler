@@ -1,7 +1,9 @@
 package com.testCrawler.indexing;
 
+import org.jsoup.internal.StringUtil;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
 import org.jsoup.select.NodeFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +34,19 @@ public class CompanyDataFilter implements NodeFilter {
     @Override
     public FilterResult head(Node node, int depth) {
         try {
-            var ownText = ((Element)node).ownText();
+            String ownText;
+
+            if (node instanceof TextNode) {
+                return FilterResult.CONTINUE;
+            } else if (node instanceof Element) {
+                ownText = ((Element)node).ownText();
+
+                if (StringUtil.isBlank(ownText)) {
+                    return FilterResult.CONTINUE;
+                }
+            } else {
+                return FilterResult.CONTINUE;
+            }
 
             if (Pattern.compile(Pattern.quote("phone"), Pattern.CASE_INSENSITIVE).matcher(ownText).find()) {
                 phoneData.add(ownText);
