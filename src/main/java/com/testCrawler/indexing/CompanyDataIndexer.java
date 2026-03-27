@@ -91,22 +91,22 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
         LOG.info("Finished indexing {}", url);
     }
 
-    SolrDocument getCompanyDocument(String domain) {
+    CompanyDocument getCompanyDocument(String domain) {
         final Map<String, String> queryParamMap = new HashMap<>();
         var query = String.format("id:\"%s\"", domain);
         queryParamMap.put("q", query);
         var queryParams = new MapSolrParams(queryParamMap);
 
         try {
-            final QueryResponse response = solrClient.query(solrCollection, queryParams);
-            final SolrDocumentList documents = response.getResults();
+            QueryResponse response = solrClient.query(solrCollection, queryParams);
+            var documents = response.getBeans(CompanyDocument.class);
 
             if (documents.isEmpty()) {
                 return null;
             }
 
-            var solrDocument = documents.get(0);
-            return solrDocument;
+            var document = documents.get(0);
+            return document;
         } catch (Exception ex) {
             LOG.error("Error retrieving document", ex);
             return null;
