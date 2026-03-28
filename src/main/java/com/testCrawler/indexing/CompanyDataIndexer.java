@@ -10,8 +10,10 @@ import org.apache.solr.common.params.MapSolrParams;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.tuple.Tuple;
+import org.apache.storm.tuple.Values;
 import org.apache.stormcrawler.Metadata;
 import org.apache.stormcrawler.indexing.AbstractIndexerBolt;
+import org.apache.stormcrawler.persistence.Status;
 import org.apache.stormcrawler.util.CharsetIdentification;
 import org.apache.stormcrawler.util.ConfUtils;
 import org.jsoup.nodes.Document;
@@ -29,6 +31,7 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
     private static final Logger LOG = LoggerFactory.getLogger(CompanyDataIndexer.class);
     private final String solrCollection = "companies";
 
+    private OutputCollector collector;
     private int maxLengthCharsetDetection = -1;
     private boolean fastCharsetDetection;
     private SolrClient solrClient;
@@ -36,6 +39,7 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
 
     @Override
     public void prepare(Map<String, Object> conf, TopologyContext context, OutputCollector collector) {
+        this.collector = collector;
         this.maxLengthCharsetDetection = ConfUtils.getInt(conf, "detect.charset.maxlength", -1);
         this.fastCharsetDetection = ConfUtils.getBoolean(conf, "detect.charset.fast", false);
 
@@ -81,6 +85,9 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
         }
 
         LOG.info("Finished indexing {}", url);
+
+        this.collector.emit("status", tuple, new Values(new Object[]{ url, metadata, Status.FETCHED }));
+        this.collector.ack(tuple);
     }
 
     RetrievalResult getCompanyDocument(String domain) {
