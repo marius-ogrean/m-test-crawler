@@ -37,3 +37,5 @@ It doesn't finish crawling under 10 minutes in the current setup because it is o
 
 Also, the Solr performance can be improved if necessary with a Solr cluster.
 
+When testing it on my machine, with Docker Desktop, the performance varied. Once I got it to crawl 500 of the 1000 websites in around 30 minutes or more. Other times, it gets slow around 100-200 websites crawled. It depends on the resources of the machine and how much you allocate to Docker Desktop.
+
