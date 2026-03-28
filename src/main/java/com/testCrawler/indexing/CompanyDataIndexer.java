@@ -120,7 +120,7 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
                 .build();
 
         try {
-            var response = solrClient.addBean(solrCollection, companyDocument, 100);
+            solrClient.addBean(solrCollection, companyDocument, 100);
         } catch (Exception ex) {
             LOG.error("Error creating document", ex);
         }
