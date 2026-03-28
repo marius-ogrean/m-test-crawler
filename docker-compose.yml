@@ -42,8 +42,16 @@ services:
   solr:
     image: solr:latest
     restart: always
+    container_name: solr
     ports:
       - "8983:8983"
     command:
       - solr-precreate
       - companies
+
+  api:
+    image: m-test-crawler/api
+    container_name: api
+    restart: always
+    ports:
+      - "4444:4444"
