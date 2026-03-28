@@ -60,15 +60,14 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
             return;
         }
 
-        LOG.info("Indexing {}", url);
-
         var body = jsoupDoc.body();
 
         var companyDataFilter = new CompanyDataFilter();
 
         body.filter(companyDataFilter);
 
-        logCompanyDataFilter(companyDataFilter);
+        // uncomment to debug crawled data
+        // logCompanyDataFilter(companyDataFilter);
 
         var domain = metadata.getFirstValue("domain");
 
@@ -83,8 +82,6 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
         } else {
             updateDocument(companyDataFilter, domain, retrievalResult.getCompanyDocument());
         }
-
-        LOG.info("Finished indexing {}", url);
 
         this.collector.emit("status", tuple, new Values(new Object[]{ url, metadata, Status.FETCHED }));
         this.collector.ack(tuple);
