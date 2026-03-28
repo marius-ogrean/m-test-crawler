@@ -177,6 +177,14 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
             shouldUpdate = true;
         }
 
+        if (!existingDocument.getFromCrawl().get(0)) {
+            var fieldModifier = new HashMap<String, Object>();
+            fieldModifier.put("set", List.of(true));
+
+            document.addField("fromCrawl", fieldModifier);
+            shouldUpdate = true;
+        }
+
         if (!shouldUpdate) {
             return;
         }
