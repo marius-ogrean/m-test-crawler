@@ -100,7 +100,7 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
         queryParamMap.put("q", query);
         var queryParams = new MapSolrParams(queryParamMap);
 
-        var result = RetrievalResult.builder().build();
+        var result = new RetrievalResult();
 
         try {
             QueryResponse response = solrClient.query(solrCollection, queryParams);
