@@ -78,7 +78,7 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
         var hasPath = checkUrlHasPath(url);
 
         if (hasPath) {
-            updateDocument(companyDataFilter, domain, url);
+            updateDocument(companyDataFilter, domain, url, false);
         } else {
             var retrievalResult = getCompanyDocument(domain);
 
@@ -91,7 +91,7 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
             if (retrievalResult.getCompanyDocument() == null) {
                 createDocument(companyDataFilter, domain, url);
             } else {
-                updateDocument(companyDataFilter, domain, url);
+                updateDocument(companyDataFilter, domain, url, true);
             }
         }
 
@@ -154,15 +154,19 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
         }
     }
 
-    void updateDocument(CompanyDataFilter companyDataFilter, String domain, String url) {
+    void updateDocument(CompanyDataFilter companyDataFilter, String domain, String url, boolean setCrawled) {
         var document = new SolrInputDocument();
         document.addField("id",domain);
+
+        boolean shouldUpdate = setCrawled;
 
         if (!companyDataFilter.getPhoneData().isEmpty()) {
             var fieldModifier = new HashMap<String, Object>();
             fieldModifier.put("add", companyDataFilter.getPhoneData());
 
             document.addField("phoneData", fieldModifier);
+
+            shouldUpdate = true;
         }
 
         if (!companyDataFilter.getSocialsData().isEmpty()) {
@@ -170,6 +174,8 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
             fieldModifier.put("add", companyDataFilter.getSocialsData());
 
             document.addField("socialsData", fieldModifier);
+
+            shouldUpdate = true;
         }
 
         if (!companyDataFilter.getAddressData().isEmpty()) {
@@ -177,12 +183,20 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
             fieldModifier.put("add", companyDataFilter.getAddressData());
 
             document.addField("addressData", fieldModifier);
+
+            shouldUpdate = true;
         }
 
-        var fieldModifier = new HashMap<String, Object>();
-        fieldModifier.put("set", List.of(true));
+        if (setCrawled) {
+            var fieldModifier = new HashMap<String, Object>();
+            fieldModifier.put("set", List.of(true));
 
-        document.addField("fromCrawl", fieldModifier);
+            document.addField("fromCrawl", fieldModifier);
+        }
+
+        if (!shouldUpdate) {
+            return;
+        }
 
         try {
             solrClient.add(solrCollection, document, 100);
