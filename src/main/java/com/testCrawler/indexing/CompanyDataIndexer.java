@@ -136,8 +136,6 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
 
         boolean shouldUpdate = false;
 
-        LOG.info("Current document: " + existingDocument.toString());
-
         if (!companyDataFilter.getPhoneData().isEmpty()) {
             var fieldModifier = new HashMap<String, Object>();
             if (existingDocument.getPhoneData() == null) {
@@ -183,7 +181,6 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
         }
 
         if (!shouldUpdate) {
-            LOG.info("No update done");
             return;
         }
 
