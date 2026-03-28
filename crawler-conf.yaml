@@ -26,6 +26,8 @@ config:
   topology.debug: false
 
   fetcher.threads.number: 50
+  http.timeout: 3000
+  fetcher.max.crawl.delay.force: true
   
   # override the JVM parameters for the workers
   topology.worker.childopts: "-Xmx2g -Djava.net.preferIPv4Stack=true"
