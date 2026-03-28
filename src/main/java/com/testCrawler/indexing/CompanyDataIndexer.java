@@ -107,7 +107,7 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
             var documents = response.getBeans(CompanyDocument.class);
 
             if (documents.isEmpty()) {
-                return null;
+                return result;
             }
 
             var document = documents.get(0);
