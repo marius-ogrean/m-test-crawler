@@ -1,7 +1,7 @@
 About the crawler:
 -
 
-It uses StormCrawler: https://stormcrawler.apache.org/
+It uses Apache StormCrawler: https://stormcrawler.apache.org/
 
 It is an open source project based on Apache Storm: https://storm.apache.org/
 
