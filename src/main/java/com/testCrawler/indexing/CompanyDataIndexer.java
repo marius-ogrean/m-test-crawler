@@ -250,6 +250,7 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
 
             return StringUtils.isNotBlank(urlObject.getPath());
         } catch (Exception ex) {
+            LOG.error("Error on checkUrlHasPath for url {}", url, ex);
             return false;
         }
     }
