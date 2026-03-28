@@ -27,4 +27,13 @@ public class CompanyDocument {
 
     @Field
     private List<Boolean> fromCrawl;
+
+    @Field
+    private List<String> commercialName;
+
+    @Field
+    private List<String> legalName;
+
+    @Field
+    private List<String> allAvailableNames;
 }
