@@ -57,6 +57,8 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
         var jsoupDoc = getPageDocument(metadata, content, url);
 
         if (jsoupDoc == null) {
+            this.collector.emit("status", tuple, new Values(url, metadata, Status.FETCHED));
+            this.collector.ack(tuple);
             return;
         }
 
@@ -74,16 +76,18 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
         var retrievalResult = getCompanyDocument(domain);
 
         if (retrievalResult.isHasError()) {
+            this.collector.emit("status", tuple, new Values(url, metadata, Status.FETCHED));
+            this.collector.ack(tuple);
             return;
         }
 
         if (retrievalResult.getCompanyDocument() == null) {
-            createDocument(companyDataFilter, domain);
+            createDocument(companyDataFilter, domain, url);
         } else {
-            updateDocument(companyDataFilter, domain, retrievalResult.getCompanyDocument());
+            updateDocument(companyDataFilter, domain, url, retrievalResult.getCompanyDocument());
         }
 
-        this.collector.emit("status", tuple, new Values(new Object[]{ url, metadata, Status.FETCHED }));
+        this.collector.emit("status", tuple, new Values(url, metadata, Status.FETCHED));
         this.collector.ack(tuple);
     }
 
@@ -114,7 +118,7 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
         }
     }
 
-    void createDocument(CompanyDataFilter companyDataFilter, String domain) {
+    void createDocument(CompanyDataFilter companyDataFilter, String domain, String url) {
         var companyDocument = CompanyDocument.builder()
                 .id(domain)
                 .phoneData(companyDataFilter.getPhoneData())
@@ -126,11 +130,12 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
         try {
             solrClient.addBean(solrCollection, companyDocument, 100);
         } catch (Exception ex) {
-            LOG.error("Error creating document", ex);
+            LOG.error("Error creating document for url {}", url, ex);
         }
     }
 
-    void updateDocument(CompanyDataFilter companyDataFilter, String domain, CompanyDocument existingDocument) {
+    void updateDocument(CompanyDataFilter companyDataFilter, String domain, String url,
+                        CompanyDocument existingDocument) {
         var document = new SolrInputDocument();
         document.addField("id",domain);
 
@@ -187,11 +192,11 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
         try {
             solrClient.add(solrCollection, document, 100);
         } catch (Exception ex) {
-            LOG.error("Error updating doc", ex);
+            LOG.error("Error updating doc for url {}", url, ex);
             try {
                 solrClient.add(solrCollection, document, 100);
             } catch (Exception ex1) {
-                LOG.error("Error updating doc retry", ex1);
+                LOG.error("Error updating doc retry for url {}", url, ex1);
             }
         }
     }
@@ -224,7 +229,7 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
             var html = Charset.forName(charset).decode(ByteBuffer.wrap(content)).toString();
             jsoupDoc = Parser.htmlParser().parseInput(html, url);
         } catch (Exception ex) {
-            LOG.error("Error parsing HTML", ex);
+            LOG.error("Error parsing HTML for url {}", url, ex);
         }
 
         return jsoupDoc;
