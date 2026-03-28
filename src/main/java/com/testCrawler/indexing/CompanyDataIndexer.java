@@ -50,20 +50,9 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
         var metadata = (Metadata)tuple.getValueByField("metadata");
         var url = tuple.getStringByField("url");
 
-        String charset;
-        if (this.fastCharsetDetection) {
-            charset = CharsetIdentification.getCharsetFast(metadata, content, this.maxLengthCharsetDetection);
-        } else {
-            charset = CharsetIdentification.getCharset(metadata, content, this.maxLengthCharsetDetection);
-        }
+        var jsoupDoc = getPageDocument(metadata, content, url);
 
-        Document jsoupDoc;
-
-        try {
-            var html = Charset.forName(charset).decode(ByteBuffer.wrap(content)).toString();
-            jsoupDoc = Parser.htmlParser().parseInput(html, url);
-        } catch (Exception ex) {
-            LOG.error("Error parsing HTML", ex);
+        if (jsoupDoc == null) {
             return;
         }
 
@@ -218,5 +207,25 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
         companyDataFilter.getAddressData().forEach(address -> {
             System.out.println("Address: " + address);
         });
+    }
+
+    private Document getPageDocument(Metadata metadata, byte[] content, String url) {
+        String charset;
+        if (this.fastCharsetDetection) {
+            charset = CharsetIdentification.getCharsetFast(metadata, content, this.maxLengthCharsetDetection);
+        } else {
+            charset = CharsetIdentification.getCharset(metadata, content, this.maxLengthCharsetDetection);
+        }
+
+        Document jsoupDoc = null;
+
+        try {
+            var html = Charset.forName(charset).decode(ByteBuffer.wrap(content)).toString();
+            jsoupDoc = Parser.htmlParser().parseInput(html, url);
+        } catch (Exception ex) {
+            LOG.error("Error parsing HTML", ex);
+        }
+
+        return jsoupDoc;
     }
 }
