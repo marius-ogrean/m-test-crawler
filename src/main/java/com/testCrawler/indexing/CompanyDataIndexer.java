@@ -7,6 +7,7 @@ import org.apache.solr.client.solrj.impl.HttpJdkSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.MapSolrParams;
+import org.apache.storm.shade.org.apache.commons.lang.StringUtils;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.tuple.Tuple;
@@ -21,6 +22,7 @@ import org.jsoup.parser.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -73,18 +75,24 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
 
         var domain = metadata.getFirstValue("domain");
 
-        var retrievalResult = getCompanyDocument(domain);
+        var hasPath = checkUrlHasPath(url);
 
-        if (retrievalResult.isHasError()) {
-            this.collector.emit("status", tuple, new Values(url, metadata, Status.FETCHED));
-            this.collector.ack(tuple);
-            return;
-        }
-
-        if (retrievalResult.getCompanyDocument() == null) {
-            createDocument(companyDataFilter, domain, url);
+        if (hasPath) {
+            updateDocument(companyDataFilter, domain, url);
         } else {
-            updateDocument(companyDataFilter, domain, url, retrievalResult.getCompanyDocument());
+            var retrievalResult = getCompanyDocument(domain);
+
+            if (retrievalResult.isHasError()) {
+                this.collector.emit("status", tuple, new Values(url, metadata, Status.FETCHED));
+                this.collector.ack(tuple);
+                return;
+            }
+
+            if (retrievalResult.getCompanyDocument() == null) {
+                createDocument(companyDataFilter, domain, url);
+            } else {
+                updateDocument(companyDataFilter, domain, url);
+            }
         }
 
         this.collector.emit("status", tuple, new Values(url, metadata, Status.FETCHED));
@@ -119,6 +127,18 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
     }
 
     void createDocument(CompanyDataFilter companyDataFilter, String domain, String url) {
+        if (companyDataFilter.getPhoneData().isEmpty()) {
+            companyDataFilter.getPhoneData().add("#");
+        }
+
+        if (companyDataFilter.getSocialsData().isEmpty()) {
+            companyDataFilter.getSocialsData().add("#");
+        }
+
+        if (companyDataFilter.getAddressData().isEmpty()) {
+            companyDataFilter.getSocialsData().add("#");
+        }
+
         var companyDocument = CompanyDocument.builder()
                 .id(domain)
                 .phoneData(companyDataFilter.getPhoneData())
@@ -134,60 +154,35 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
         }
     }
 
-    void updateDocument(CompanyDataFilter companyDataFilter, String domain, String url,
-                        CompanyDocument existingDocument) {
+    void updateDocument(CompanyDataFilter companyDataFilter, String domain, String url) {
         var document = new SolrInputDocument();
         document.addField("id",domain);
 
-        boolean shouldUpdate = false;
-
         if (!companyDataFilter.getPhoneData().isEmpty()) {
             var fieldModifier = new HashMap<String, Object>();
-            if (existingDocument.getPhoneData() == null) {
-                fieldModifier.put("set", companyDataFilter.getPhoneData());
-            } else {
-                fieldModifier.put("add", companyDataFilter.getPhoneData());
-            }
+            fieldModifier.put("add", companyDataFilter.getPhoneData());
 
             document.addField("phoneData", fieldModifier);
-            shouldUpdate = true;
         }
 
         if (!companyDataFilter.getSocialsData().isEmpty()) {
             var fieldModifier = new HashMap<String, Object>();
-            if (existingDocument.getSocialsData() == null) {
-                fieldModifier.put("set", companyDataFilter.getSocialsData());
-            } else {
-                fieldModifier.put("add", companyDataFilter.getSocialsData());
-            }
+            fieldModifier.put("add", companyDataFilter.getSocialsData());
 
             document.addField("socialsData", fieldModifier);
-            shouldUpdate = true;
         }
 
         if (!companyDataFilter.getAddressData().isEmpty()) {
             var fieldModifier = new HashMap<String, Object>();
-            if (existingDocument.getAddressData() == null) {
-                fieldModifier.put("set", companyDataFilter.getAddressData());
-            } else {
-                fieldModifier.put("add", companyDataFilter.getAddressData());
-            }
+            fieldModifier.put("add", companyDataFilter.getAddressData());
 
             document.addField("addressData", fieldModifier);
-            shouldUpdate = true;
         }
 
-        if (!existingDocument.getFromCrawl().get(0)) {
-            var fieldModifier = new HashMap<String, Object>();
-            fieldModifier.put("set", List.of(true));
+        var fieldModifier = new HashMap<String, Object>();
+        fieldModifier.put("set", List.of(true));
 
-            document.addField("fromCrawl", fieldModifier);
-            shouldUpdate = true;
-        }
-
-        if (!shouldUpdate) {
-            return;
-        }
+        document.addField("fromCrawl", fieldModifier);
 
         try {
             solrClient.add(solrCollection, document, 100);
@@ -233,5 +228,15 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
         }
 
         return jsoupDoc;
+    }
+
+    private boolean checkUrlHasPath(String url) {
+        try {
+            var urlObject = new URL(url);
+
+            return StringUtils.isNotBlank(urlObject.getPath());
+        } catch (Exception ex) {
+            return false;
+        }
     }
 }
