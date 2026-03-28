@@ -136,7 +136,7 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
         }
 
         if (companyDataFilter.getAddressData().isEmpty()) {
-            companyDataFilter.getSocialsData().add("#");
+            companyDataFilter.getAddressData().add("#");
         }
 
         var companyDocument = CompanyDocument.builder()
