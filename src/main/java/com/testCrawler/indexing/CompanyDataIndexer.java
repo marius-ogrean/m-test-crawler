@@ -1,6 +1,7 @@
 package com.testCrawler.indexing;
 
 import com.testCrawler.models.CompanyDocument;
+import com.testCrawler.models.RetrievalResult;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.HttpJdkSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -27,7 +28,6 @@ import java.util.Map;
 public class CompanyDataIndexer extends AbstractIndexerBolt {
     private static final Logger LOG = LoggerFactory.getLogger(CompanyDataIndexer.class);
     private final String solrCollection = "companies";
-    private final String errorString = "error";
 
     private int maxLengthCharsetDetection = -1;
     private boolean fastCharsetDetection;
@@ -79,26 +79,28 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
 
         var domain = metadata.getFirstValue("domain");
 
-        var companyDocument = getCompanyDocument(domain);
+        var retrievalResult = getCompanyDocument(domain);
 
-        if (companyDocument != null && companyDocument.getId().equals(errorString)) {
+        if (retrievalResult.isHasError()) {
             return;
         }
 
-        if (companyDocument == null) {
+        if (retrievalResult.getCompanyDocument() == null) {
             createDocument(companyDataFilter, domain);
         } else {
-            updateDocument(companyDataFilter, domain, companyDocument);
+            updateDocument(companyDataFilter, domain, retrievalResult.getCompanyDocument());
         }
 
         LOG.info("Finished indexing {}", url);
     }
 
-    CompanyDocument getCompanyDocument(String domain) {
+    RetrievalResult getCompanyDocument(String domain) {
         final Map<String, String> queryParamMap = new HashMap<>();
         var query = String.format("id:\"%s\"", domain);
         queryParamMap.put("q", query);
         var queryParams = new MapSolrParams(queryParamMap);
+
+        var result = RetrievalResult.builder().build();
 
         try {
             QueryResponse response = solrClient.query(solrCollection, queryParams);
@@ -109,11 +111,13 @@ public class CompanyDataIndexer extends AbstractIndexerBolt {
             }
 
             var document = documents.get(0);
-            return document;
+            result.setCompanyDocument(document);
+            return result;
         } catch (Exception ex) {
             LOG.error("Error retrieving document", ex);
-            var errorDocument = CompanyDocument.builder().id(errorString).build();
-            return errorDocument;
+
+            result.setHasError(true);
+            return result;
         }
     }
 
