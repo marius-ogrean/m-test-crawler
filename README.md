@@ -1,3 +1,12 @@
+About the crawler:
+-
+
+It uses StormCrawler: https://stormcrawler.apache.org/
+
+It is an open source project based on Apache Storm: https://storm.apache.org/
+
+Apache Storm being a "distributed realtime computation system" it allows scaling the performance by adding more machines (nodes).
+
 Steps to run the crawler:
 -
 
@@ -21,10 +30,10 @@ You can view the StormUI here: http://localhost:8080/
 
 If you want to kill the crawl, inside StormUI click the crawler under Topology Summary and press Kill. After killing the crawler you can't start it again. You have to delete the docker compose project that is running and start from step 4  from above.
 
-About the performance of the crawler:
+About the performance of this crawler:
 -
 
 It doesn't finish crawling under 10 minutes in the current setup because it is only one Storm worker running. If we would have a Storm cluster of multiple nodes, each running workers, the crawl would run much quicker.
 
-Also, the Solr performance can be improved if necessary with a Solr cluster
+Also, the Solr performance can be improved if necessary with a Solr cluster.
 
