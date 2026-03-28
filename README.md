@@ -7,7 +7,7 @@ Steps to run the crawler:
 4. Run the script run_docker_compose.cmd or the command inside it
 5. Run the script put_urls.cmd or the command inside it
 6. Open a browser and go to this url: http://localhost:4444/companyData/uploadCompanyNamesFromFile (I made it a GET so that you can run it directly without having to use a tool to send a POST)
-7. Run the script run_crawler_docker_windows.cmd or on Linux/Mac run_crawler_docker_linux.sh (I have at home a Windows machine, I couldn't test the sh script)
+7. To start the crawl run the script run_crawler_docker_windows.cmd or on Linux/Mac run_crawler_docker_linux.sh (I have at home a Windows machine, I couldn't test the sh script)
 
 How to view the status of the crawl:
 -
