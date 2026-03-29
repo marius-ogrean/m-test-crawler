@@ -15,6 +15,8 @@ The id of each document in Solr is the domain name of the website. I chose this 
 
 The crawled data from the websites is stored in three fields in the document: phoneData, socialsData and addressData.
 
+The crawling of the pages is done like this: the body of the html is taken and a depth search is done on it to find keywords like "phone", "facebook", "instagram" and "address". The text containing that keyword in saved in one of the three fields above. 
+
 Steps to run the crawler:
 -
 
