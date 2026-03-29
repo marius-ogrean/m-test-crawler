@@ -30,7 +30,7 @@ You can query the solr server here: http://localhost:8983/solr/#/companies/query
 
 You can view the StormUI here: http://localhost:8080/
 
-If you want to kill the crawl, inside StormUI click the crawler under Topology Summary and press Kill. After killing the crawler you can't start it again. You have to delete the docker compose project that is running and start from step 4  from above.
+You can view details about the crawler pipeline by clicking on the "crawler" under Topology Summary. There you can kill the crawl if you want by pressing the Kill button. After killing the crawler you can't start it again. You have to delete the docker compose project that is running and restart from step 4  from above.
 
 About the performance of this crawler:
 -
