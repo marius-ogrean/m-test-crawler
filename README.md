@@ -19,7 +19,7 @@ Steps to run the crawler:
 5. Run the script put_urls.cmd or the command inside it
 6. Open a browser and go to this url: http://localhost:4444/companyData/uploadCompanyNamesFromFile (I made it a GET so that you can run it directly without having to use a tool to send a POST)
 7. To start the crawl run the script run_crawler_docker_windows.cmd or on Linux/Mac run_crawler_docker_linux.sh (I have at home a Windows machine, I couldn't test the sh script)
-8. To improve performance, go to http://localhost:8080/, under Topology Summary click the "crawler", then press Change log level, in the Logger column write ROOT, in the level column pick ERROR and in the Timeout column write 3600. This will stop the logging of all the components. Without it, after 10 minutes the log file gets 11 MB big, with this change, it stays at around 150-200KB. 
+8. To improve performance, go to http://localhost:8080/, under Topology Summary click the "crawler", then press Change log level, in the Logger column write ROOT, in the level column pick ERROR and in the Timeout column write 3600. This will stop the logging of all the components. Without it, after 10 minutes the log file gets 11 MB big, with this change, it stays at around 130KB. 
 
 How to view the status of the crawl:
 -
