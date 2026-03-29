@@ -13,6 +13,8 @@ The logic of the parsing of datapoints is in the class CompanyDataIndexer. The d
 
 The id of each document in Solr is the domain name of the website. I chose this since it is already unique and we have them in the list of websites to crawl.
 
+The crawled data from the websites is stored in three fields in the document: phoneData, socialsData and addressData.
+
 Steps to run the crawler:
 -
 
