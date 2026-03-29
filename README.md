@@ -44,11 +44,9 @@ You can view details about the crawler pipeline by clicking on the "crawler" und
 About the performance of this crawler:
 -
 
-It doesn't finish crawling under 10 minutes in the current setup because it is only one Storm worker running. If we would have a Storm cluster of multiple nodes, each running workers, the crawl would run much quicker.
+It doesn't finish crawling under 10 minutes in the current setup because it is only one Storm worker running. On my machine it crawls 400 websites in 10 minutes out of the 1000. Maybe with a stronger machine it would do more. For sure, with a Storm cluster of multiple machines (nodes it would finish in under 10 minutes).
 
 Also, the Solr performance can be improved if necessary with a Solr cluster.
-
-When testing it on my machine, with Docker Desktop, the performance varied. Once I got it to crawl 500 of the 1000 websites in around 30 minutes or more. Other times, it gets at around 300 crawled in 10 minutes. Stronger machines would have better results with only one worker.
 
 Regarding the extraction of the data points, there is much room to improve. The logic I implemented is pretty simple but the best approach is to use machine learning. 
 
