@@ -7,7 +7,7 @@ It is an open source project based on Apache Storm: https://storm.apache.org/
 
 Apache Storm being a "distributed realtime computation system" it allows scaling the performance by adding more machines (nodes).
 
-The datapoints are stored in Apache Solr.
+The logic of the parsing of datapoints is in the class CompanyDataIndexer. The datapoints are stored in Apache Solr.
 
 Steps to run the crawler:
 -
