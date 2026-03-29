@@ -9,7 +9,7 @@ Apache Storm being a "distributed realtime computation system" it allows scaling
 
 That's why I chose it, to ensure that high performance requirements can be met.
 
-The logic of the parsing of datapoints is in the class CompanyDataIndexer. The datapoints are stored in Apache Solr.
+The logic of the parsing of datapoints is in the class CompanyDataIndexer. The datapoints are stored in Apache Solr. I chose Solr instead of Elastic Search because it is free.
 
 Steps to run the crawler:
 -
