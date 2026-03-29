@@ -44,7 +44,7 @@ You can view details about the crawler pipeline by clicking on the "crawler" und
 About the performance of this crawler:
 -
 
-It doesn't finish crawling under 10 minutes in the current setup because it is only one Storm worker running. On my machine it crawls 400 websites in 10 minutes out of the 1000. Maybe with a stronger machine it would do more. For sure, with a Storm cluster of multiple machines (nodes it would finish in under 10 minutes).
+It doesn't finish crawling under 10 minutes in the current setup because it is only one Storm worker running. On my machine it crawls 400 websites in 10 minutes out of the 1000. Maybe with a stronger machine it would do more. For sure, with a Storm cluster of multiple machines (nodes) it would finish in under 10 minutes.
 
 Also, the Solr performance can be improved if necessary with a Solr cluster.
 
