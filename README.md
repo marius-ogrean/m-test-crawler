@@ -7,7 +7,7 @@ It is an open source project based on Apache Storm: https://storm.apache.org/
 
 Apache Storm being a "distributed realtime computation system" it allows scaling the performance by adding more machines (nodes).
 
-That's why I chose it, to ensure that high performance requirements can be met.
+That's why I chose it, to ensure that high performance requirements can be met. I first wanted to use Apache Nutch but since I have a Windows machine, I needed a Cygwin and the setup was too complicated. I went with StormCrawler instead.
 
 The logic of the parsing of datapoints is in the class CompanyDataIndexer. The datapoints are stored in Apache Solr. I chose Solr instead of Elastic Search because it is free.
 
