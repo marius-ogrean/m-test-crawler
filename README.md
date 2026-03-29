@@ -11,6 +11,8 @@ That's why I chose it, to ensure that high performance requirements can be met.
 
 The logic of the parsing of datapoints is in the class CompanyDataIndexer. The datapoints are stored in Apache Solr. I chose Solr instead of Elastic Search because it is free.
 
+The id of each document in Solr is the domain name of the website. I chose this since it is already unique and we have them in the list of websites to crawl.
+
 Steps to run the crawler:
 -
 
