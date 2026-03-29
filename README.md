@@ -12,7 +12,7 @@ The logic of the parsing of datapoints is in the class CompanyDataIndexer. The d
 Steps to run the crawler:
 -
 
-1. First follow the steps in the project m-test-crawler-api so that you build the Docker image for the api
+1. First follow the steps in the project https://github.com/marius-ogrean/m-test-crawler-api so that you build the Docker image for the api
 2. Go to the root folder of THIS project
 3. Run "mvn clean package" to build the jar
 4. Run the script run_docker_compose.cmd or the command inside it
