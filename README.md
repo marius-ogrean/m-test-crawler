@@ -29,7 +29,7 @@ You can check the coverage here: http://localhost:4444/companyData/coverage
 
 You can check the fill rate here: http://localhost:4444/companyData/fillRate
 
-You can query the solr server here: http://localhost:8983/solr/#/companies/query
+You can query the solr server here: http://localhost:8983/solr/#/companies/query Sample query: fromCrawl:(true)
 
 You can view the StormUI here: http://localhost:8080/
 
